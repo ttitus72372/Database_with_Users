@@ -65,3 +65,10 @@ def option4():
 def option5():
   conn.commit()
   conn.close()
+  quit("Done")
+keepgoing()
+option1()
+option2()
+option3()
+option4()
+option5()

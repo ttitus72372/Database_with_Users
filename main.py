@@ -52,7 +52,23 @@ def option1():
 
 def option2():
   search_country = input("\nType in the country you wish to search for:\n")
-  c.execute("SELECT * FROM country WHERE name=?", (search_country,))
+  #cleaning up user input
+  newstring = ''
+  position = 1
+  for a in search_country:
+    if (a.isupper()) == True and position == 1:
+      newstring += a
+      position += 1
+    elif (a.isupper()) == True and position != 1:
+      newstring += (a.lower())
+      position += 1
+    elif (a.islower()) == True and position == 1:
+      newstring += (a.upper())
+      position +=1
+    elif (a.islower()) == True and position != 1:
+      newstring += a
+      position += 1
+  c.execute("SELECT * FROM country WHERE name=?", (newstring,))
   try:
     countries = c.fetchone()[1]
     print(countries, "was found.")
@@ -64,8 +80,32 @@ def option3():
   print(data)
 def option4():
   remove_country = input("\nType in the name of a country you wish to delete:\n")
-  c.execute("DELETE FROM country WHERE name=?", (remove_country,))
-  conn.commit()
+  #cleaning up user input
+  newstring = ''
+  position = 1
+  for a in remove_country:
+    if (a.isupper()) == True and position == 1:
+      newstring += a
+      position += 1
+    elif (a.isupper()) == True and position != 1:
+      newstring += (a.lower())
+      position += 1
+    elif (a.islower()) == True and position == 1:
+      newstring += (a.upper())
+      position +=1
+    elif (a.islower()) == True and position != 1:
+      newstring += a
+      position += 1
+  #double checking to make sure the contry submitted is in the database
+  c.execute("SELECT * FROM country WHERE name=?", (newstring,))
+  try:
+    country = c.fetchone()[1]
+    if country is not None:
+      c.execute("DELETE FROM country WHERE name=?", (newstring,))
+      conn.commit()
+  except:
+    print("That country is not in the database.")
+  
 def option5():
   conn.commit()
   conn.close()

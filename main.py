@@ -26,7 +26,7 @@ def keepgoing():
       option5()
 
 def option1():
-  add_country = input("Type in the name of a country you wish to add:\n")
+  add_country = input("\nType in the name of a country you wish to add:\n")
   #cleaning up user input
   newstring = ''
   position = 1
@@ -44,10 +44,14 @@ def option1():
       newstring += a
       position += 1
   c.execute("INSERT INTO country(name) VALUES(?)", (newstring,))
+  check_addition = newstring
+  c.execute("SELECT * FROM country WHERE name=?", (check_addition,))
+  check = c.fetchone()[1]
+  print(check, "was added to the database.\n")
   conn.commit()
 
 def option2():
-  search_country = input("Type in the country you wish to search for:\n")
+  search_country = input("\nType in the country you wish to search for:\n")
   c.execute("SELECT * FROM country WHERE name=?", (search_country,))
   try:
     countries = c.fetchone()[1]
@@ -59,7 +63,7 @@ def option3():
   data = c.fetchall()
   print(data)
 def option4():
-  remove_country = input("Type in the name of a country you wish to delete:\n")
+  remove_country = input("\nType in the name of a country you wish to delete:\n")
   c.execute("DELETE FROM country WHERE name=?", (remove_country,))
   conn.commit()
 def option5():

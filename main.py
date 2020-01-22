@@ -83,9 +83,16 @@ def option2():
     print("\nYou included an invalid character, try again.")
     option2()
 def option3():
-  c.execute("SELECT * FROM country")
-  data = c.fetchall()
-  print(data)
+  c.execute("SELECT name FROM country")
+  print("\nThe countries currently in the database are:")
+  print("-------------------")
+  for row in c.fetchall():
+    for item in row:
+      item = row[0]
+      print(item)
+  print('\n')
+      
+  
 def option4():
   remove_country = input("\nType in the name of a country you wish to delete:\n")
   #cleaning up user input

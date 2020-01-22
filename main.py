@@ -30,50 +30,58 @@ def option1():
   #cleaning up user input
   newstring = ''
   position = 1
-  for a in add_country:
-    if (a.isupper()) == True and position == 1:
-      newstring += a
-      position += 1
-    elif (a.isupper()) == True and position != 1:
-      newstring += (a.lower())
-      position += 1
-    elif (a.islower()) == True and position == 1:
-      newstring += (a.upper())
-      position +=1
-    elif (a.islower()) == True and position != 1:
-      newstring += a
-      position += 1
-  c.execute("INSERT INTO country(name) VALUES(?)", (newstring,))
-  check_addition = newstring
-  c.execute("SELECT * FROM country WHERE name=?", (check_addition,))
-  check = c.fetchone()[1]
-  print(check, "was added to the database.\n")
-  conn.commit()
+  if (add_country.isalpha()) == True:
+    for a in add_country:
+      if (a.isupper()) == True and position == 1:
+        newstring += a
+        position += 1
+      elif (a.isupper()) == True and position != 1:
+        newstring += (a.lower())
+        position += 1
+      elif (a.islower()) == True and position == 1:
+        newstring += (a.upper())
+        position +=1
+      elif (a.islower()) == True and position != 1:
+        newstring += a
+        position += 1
+    c.execute("INSERT INTO country(name) VALUES(?)", (newstring,))
+    check_addition = newstring
+    c.execute("SELECT * FROM country WHERE name=?", (check_addition,))
+    check = c.fetchone()[1]
+    print(check, "was added to the database.\n")
+    conn.commit()
+  else:
+    print("\nYou included an invalid character, try again.")
+    option1()
 
 def option2():
   search_country = input("\nType in the country you wish to search for:\n")
   #cleaning up user input
   newstring = ''
   position = 1
-  for a in search_country:
-    if (a.isupper()) == True and position == 1:
-      newstring += a
-      position += 1
-    elif (a.isupper()) == True and position != 1:
-      newstring += (a.lower())
-      position += 1
-    elif (a.islower()) == True and position == 1:
-      newstring += (a.upper())
-      position +=1
-    elif (a.islower()) == True and position != 1:
-      newstring += a
-      position += 1
-  c.execute("SELECT * FROM country WHERE name=?", (newstring,))
-  try:
-    countries = c.fetchone()[1]
-    print(countries, "was found.")
-  except:
-    print("That country is not in the database.")
+  if (search_country.isalpha()) == True: 
+    for a in search_country:
+      if (a.isupper()) == True and position == 1:
+        newstring += a
+        position += 1
+      elif (a.isupper()) == True and position != 1:
+        newstring += (a.lower())
+        position += 1
+      elif (a.islower()) == True and position == 1:
+        newstring += (a.upper())
+        position +=1
+      elif (a.islower()) == True and position != 1:
+        newstring += a
+        position += 1
+    c.execute("SELECT * FROM country WHERE name=?", (newstring,))
+    try:
+      countries = c.fetchone()[1]
+      print(countries, "was found.")
+    except:
+      print("That country is not in the database.")
+  else:
+    print("\nYou included an invalid character, try again.")
+    option2()
 def option3():
   c.execute("SELECT * FROM country")
   data = c.fetchall()
@@ -83,19 +91,23 @@ def option4():
   #cleaning up user input
   newstring = ''
   position = 1
-  for a in remove_country:
-    if (a.isupper()) == True and position == 1:
-      newstring += a
-      position += 1
-    elif (a.isupper()) == True and position != 1:
-      newstring += (a.lower())
-      position += 1
-    elif (a.islower()) == True and position == 1:
-      newstring += (a.upper())
-      position +=1
-    elif (a.islower()) == True and position != 1:
-      newstring += a
-      position += 1
+  if (remove_country.isalpha()) == True:
+    for a in remove_country:
+      if (a.isupper()) == True and position == 1:
+        newstring += a
+        position += 1
+      elif (a.isupper()) == True and position != 1:
+        newstring += (a.lower())
+        position += 1
+      elif (a.islower()) == True and position == 1:
+        newstring += (a.upper())
+        position +=1
+      elif (a.islower()) == True and position != 1:
+        newstring += a
+        position += 1
+  else:
+    print("\nYou included an invalid character, try again.")
+    option4()
   #double checking to make sure the contry submitted is in the database
   c.execute("SELECT * FROM country WHERE name=?", (newstring,))
   try:

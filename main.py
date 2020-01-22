@@ -103,6 +103,7 @@ def option4():
     if country is not None:
       c.execute("DELETE FROM country WHERE name=?", (newstring,))
       conn.commit()
+      print(newstring, "was deleted.\n")
   except:
     print("That country is not in the database.")
   

@@ -13,7 +13,7 @@ c.execute(""" CREATE TABLE IF NOT EXISTS country (
 def keepgoing():
   choice = 0
   while choice != 5:
-    choice = choice = int(input("Choose an option." + "\n" + "1 to add a country" + "\n" + "2 to search for a specific country" + "\n" + "3 show all data in the database" + "\n" + "4 to delete a country" + "\n" "5 to exit." + "\n"))
+    choice = choice = int(input("\nChoose an option." + "\n" + "1 to add a country" + "\n" + "2 to search for a specific country" + "\n" + "3 show all data in the database" + "\n" + "4 to delete a country" + "\n" "5 to exit.\n" + "\nYour option:\t"))
     if choice == 1:
       option1()
     elif choice == 2:

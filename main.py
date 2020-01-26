@@ -10,78 +10,87 @@ c.execute(""" CREATE TABLE IF NOT EXISTS country (
 );""")
 '''
 
+def cleanup(userInput, userChoice):
+  if userChoice == 1:
+    current_option = option1
+  if userChoice == 2:
+    current_option = option2
+  if userChoice == 4:
+    current_option = option4
+
+
+  newstring = ''
+  position = 1
+  for a in userInput:
+    if (a.isnumeric()) == False:
+      if (a.isalpha()) == True:
+        if (a.isupper()) == True and position == 1:
+          newstring += a
+          position += 1
+        elif (a.isupper()) == True and position != 1:
+          newstring += (a.lower())
+          position += 1
+        elif (a.islower()) == True and position == 1:
+          newstring += (a.upper())
+          position +=1
+        elif (a.islower()) == True and position != 1:
+          newstring += a
+          position += 1
+      elif a == ' ' and position == 1:
+        return print("\nThe first character was a space, try again."), current_option(userChoice)
+      elif a == ' ' and position != 1:
+        newstring += a
+        position += 1
+    elif (a.isnumeric()) == True:
+      return print("\nThat is an invalid input, try again."), current_option(userChoice)
+  
+  
+
+  
+  return newstring
+
 def keepgoing():
   choice = 0
   while choice != 5:
-    choice = choice = int(input("\nChoose an option." + "\n" + "1 to add a country" + "\n" + "2 to search for a specific country" + "\n" + "3 show all data in the database" + "\n" + "4 to delete a country" + "\n" "5 to exit.\n" + "\nYour option:\t"))
+    choice = int(input("\nChoose an option." + "\n" + "1 to add a country" + "\n" + "2 to search for a specific country" + "\n" + "3 show all data in the database" + "\n" + "4 to delete a country" + "\n" "5 to exit.\n" + "\nYour option:\t"))
     if choice == 1:
-      option1()
+      option1(choice)
     elif choice == 2:
-      option2()
+      option2(choice)
     elif choice == 3:
       option3()
     elif choice == 4:
-      option4()
+      option4(choice)
     elif choice == 5:
       option5()
+  
 
-def option1():
+def option1(choice):
+  user_option = choice
   add_country = input("\nType in the name of a country you wish to add:\n")
+  
   #cleaning up user input
-  newstring = ''
-  position = 1
-  if (add_country.isalpha()) == True:
-    for a in add_country:
-      if (a.isupper()) == True and position == 1:
-        newstring += a
-        position += 1
-      elif (a.isupper()) == True and position != 1:
-        newstring += (a.lower())
-        position += 1
-      elif (a.islower()) == True and position == 1:
-        newstring += (a.upper())
-        position +=1
-      elif (a.islower()) == True and position != 1:
-        newstring += a
-        position += 1
-    c.execute("INSERT INTO country(name) VALUES(?)", (newstring,))
-    check_addition = newstring
-    c.execute("SELECT * FROM country WHERE name=?", (check_addition,))
-    check = c.fetchone()[1]
-    print(check, "was added to the database.\n")
-    conn.commit()
-  else:
-    print("\nYou included an invalid character, try again.")
-    option1()
+  newstring = cleanup(add_country, user_option)
+      
+  c.execute("INSERT INTO country(name) VALUES(?)", (newstring,))
+  check_addition = newstring
+  c.execute("SELECT * FROM country WHERE name=?", (check_addition,))
+  check = c.fetchone()[1]
+  print(check, "was added to the database.\n")
+  conn.commit()
+  
 
-def option2():
+def option2(choice):
+  user_option = choice
   search_country = input("\nType in the country you wish to search for:\n")
   #cleaning up user input
-  newstring = ''
-  position = 1
-  if (search_country.isalpha()) == True: 
-    for a in search_country:
-      if (a.isupper()) == True and position == 1:
-        newstring += a
-        position += 1
-      elif (a.isupper()) == True and position != 1:
-        newstring += (a.lower())
-        position += 1
-      elif (a.islower()) == True and position == 1:
-        newstring += (a.upper())
-        position +=1
-      elif (a.islower()) == True and position != 1:
-        newstring += a
-        position += 1
-    c.execute("SELECT * FROM country WHERE name=?", (newstring,))
-    try:
-      countries = c.fetchone()[1]
-      print(countries, "was found.")
-    except:
-      print("That country is not in the database.")
-  else:
-    print("\nYou included an invalid character, try again.")
-    option2()
+  newstring = cleanup(search_country, user_option)
+  c.execute("SELECT * FROM country WHERE name=?", (newstring,))
+  try:
+    countries = c.fetchone()[1]
+    print(countries, "was found.")
+  except:
+    print("That country is not in the database.")
 def option3():
   c.execute("SELECT name FROM country")
   print("\nThe countries currently in the database are:")
@@ -93,28 +102,11 @@ def option3():
   print('\n')
       
   
-def option4():
+def option4(choice):
+  user_option = choice
   remove_country = input("\nType in the name of a country you wish to delete:\n")
   #cleaning up user input
-  newstring = ''
-  position = 1
-  if (remove_country.isalpha()) == True:
-    for a in remove_country:
-      if (a.isupper()) == True and position == 1:
-        newstring += a
-        position += 1
-      elif (a.isupper()) == True and position != 1:
-        newstring += (a.lower())
-        position += 1
-      elif (a.islower()) == True and position == 1:
-        newstring += (a.upper())
-        position +=1
-      elif (a.islower()) == True and position != 1:
-        newstring += a
-        position += 1
-  else:
-    print("\nYou included an invalid character, try again.")
-    option4()
+  newstring = cleanup(remove_country, user_option)
   #double checking to make sure the contry submitted is in the database
   c.execute("SELECT * FROM country WHERE name=?", (newstring,))
   try:

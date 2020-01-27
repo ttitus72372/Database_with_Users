@@ -20,6 +20,7 @@ def cleanup(userInput, userChoice):
 
 
   newstring = ''
+  string_length = len(userInput)
   position = 1
   for a in userInput:
     if (a.isnumeric()) == False:
@@ -36,9 +37,9 @@ def cleanup(userInput, userChoice):
         elif (a.islower()) == True and position != 1:
           newstring += a
           position += 1
-      elif a == ' ' and position == 1:
-        return print("\nThe first character was a space, try again."), current_option(userChoice)
-      elif a == ' ' and position != 1:
+      elif a == ' ' and position == 1 or position == string_length:
+        return print("\nThe first or last character of your entry was a space, try again."), current_option(userChoice)
+      elif a == ' ':
         newstring += a
         position += 1
     elif (a.isnumeric()) == True:
@@ -67,17 +68,24 @@ def keepgoing():
 
 def option1(choice):
   user_option = choice
+  current_option = option1
   add_country = input("\nType in the name of a country you wish to add:\n")
   
   #cleaning up user input
   newstring = cleanup(add_country, user_option)
-      
-  c.execute("INSERT INTO country(name) VALUES(?)", (newstring,))
-  check_addition = newstring
-  c.execute("SELECT * FROM country WHERE name=?", (check_addition,))
-  check = c.fetchone()[1]
-  print(check, "was added to the database.\n")
-  conn.commit()
+  c.execute("SELECT * FROM country WHERE name=?", (newstring,))
+  try:
+    countries = c.fetchone()[1]
+    print(countries, "is already in the database, try again.")
+    current_option(user_option)
+  except:
+    c.execute("INSERT INTO country(name) VALUES(?)", (newstring,))
+    check_addition = newstring
+    c.execute("SELECT * FROM country WHERE name=?", (check_addition,))
+    check = c.fetchone()[1]
+    print(check, "was added to the database.\n")
+    conn.commit()
+  
   
 
 def option2(choice):

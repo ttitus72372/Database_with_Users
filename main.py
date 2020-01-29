@@ -18,37 +18,56 @@ def cleanup(userInput, userChoice):
   if userChoice == 4:
     current_option = option4
 
-
+#inital cleanup of the user's input
   newstring = ''
-  string_length = len(userInput)
   position = 1
   for a in userInput:
     if (a.isnumeric()) == False:
-      if (a.isalpha()) == True:
-        if (a.isupper()) == True and position == 1:
-          newstring += a
-          position += 1
-        elif (a.isupper()) == True and position != 1:
-          newstring += (a.lower())
-          position += 1
-        elif (a.islower()) == True and position == 1:
-          newstring += (a.upper())
-          position +=1
-        elif (a.islower()) == True and position != 1:
-          newstring += a
-          position += 1
-      elif a == ' ' and position == 1 or position == string_length:
-        return print("\nThe first or last character of your entry was a space, try again."), current_option(userChoice)
+      if a != ' ':
+        if (a.isalpha()) == True:
+          if (a.isupper()) == True and position == 1:
+            newstring += a
+            position += 1
+          elif (a.isupper()) == True and position != 1:
+            newstring += (a.lower())
+            position += 1
+          elif (a.islower()) == True and position == 1:
+            newstring += (a.upper())
+            position +=1
+          elif (a.islower()) == True and position != 1:
+            newstring += a
+            position += 1
+        elif (a.isalpha()) == False:
+          return print("You have entered an invalid cahracter, tray again."), current_option(userChoice)
+      elif a == ' ' and position == 1:
+        return print("\nThe first character of your entry was a space, try again."), current_option(userChoice)
       elif a == ' ':
         newstring += a
         position += 1
     elif (a.isnumeric()) == True:
       return print("\nThat is an invalid input, try again."), current_option(userChoice)
   
-  
 
+#further cleanup before returning for database use
+  current_position = 0
   
-  return newstring
+  final_string = ''
+  for character in newstring:
+    if (character.isalpha()) == True and newstring[current_position - 1] == ' ':
+      final_string += (character.upper())
+      current_position += 1
+    elif character == ' ' and newstring[-1] == ' ':
+      return print("The entry ends with a space, try again."), current_option(userChoice)
+    elif character == ' ' and newstring[current_position - 1] == ' ':
+      return print("\nYou have to many spaces, try again."), current_option(userChoice)
+    elif character == " ":
+      final_string += character
+      current_position += 1
+    elif (character.isalpha()) == True:
+      final_string += character
+      current_position += 1
+  
+  return final_string
 
 def keepgoing():
   choice = 0

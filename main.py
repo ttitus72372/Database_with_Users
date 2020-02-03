@@ -2,14 +2,65 @@ import sqlite3
 
 conn = sqlite3.connect('country.db')
 c = conn.cursor()
+
 '''
+c.execute("""CREATE TABLE IF NOT EXISTS users(
+  uid integer PRIMARY KEY,
+  name text,
+  password text,
+  UNIQUE(name)
+)""")
+
+
 c.execute(""" CREATE TABLE IF NOT EXISTS country (
   id integer PRIMARY KEY,
-  name text NOT NULL, 
+  name text NOT NULL,
+  uid INTEGER REFERENCES users(uid), 
   UNIQUE(name)
-);""")
-'''
+)""")
 
+admin = "admin"
+password = "S3CR3T"
+admin_pass = hash(password)
+'''
+def sign_up():
+  new_user = input("\nCreate a username:\t")
+  new_password = input("\n Make a password:\t")
+  if len(new_password) < 3 or len(new_password) > 20:
+    print("Your passowrd is less than 3 characters or longer than 20 characters, try again.")
+    sign_up()
+  new_pass_hash = hash(new_password)
+  try:
+    c.execute("SELECT * FROM users WHERE name=?", (new_user,))
+    user = c.fetchone()[1]
+    print(user, " is taken, try again.")
+    sign_up()
+  except:
+    c.execute("INSERT INTO user(name, password) VALUES(?)", (new_user, new_pass_hash,))
+    check_addition = new_user
+    c.execute("SELECT * FROM country WHERE name=?", (check_addition,))
+    check = c.fetchone()[1]
+    print("You are in the database, ", check)
+    conn.commit()
+
+def sign_in():
+  choice = int(input("\nChoose an option:\nEnter 1 if you have used this database before.\nEnter 2 if you're new.\nYour option:\t "))
+  if choice == 1:
+    login()
+  if choice == 2:
+    sign_up()
+
+def login():
+  username = input("Your Username:\t")
+  password = input("Your password:\t")
+  pass_hash = hash(password)
+  try:
+    c.execute("SELECT name FROM users WHERE name=?", (username,))
+    user = c.fetchall[1]
+    c.execute("SELECT password FROM users WHERE password=?", (pass_hash,))
+    
+    print("Welcome ", username)
+'''
 def cleanup(userInput, userChoice):
   if userChoice == 1:
     current_option = option1
@@ -18,7 +69,7 @@ def cleanup(userInput, userChoice):
   if userChoice == 4:
     current_option = option4
 
-#inital cleanup of the user's input
+  #inital cleanup of the user's input
   newstring = ''
   position = 1
   for a in userInput:
@@ -150,8 +201,4 @@ def option5():
   conn.close()
   quit("Done")
 keepgoing()
-option1()
-option2()
-option3()
-option4()
-option5()
+'''

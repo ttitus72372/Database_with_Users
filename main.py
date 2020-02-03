@@ -51,15 +51,25 @@ def sign_in():
     sign_up()
 
 def login():
+  current_user = []
   username = input("Your Username:\t")
   password = input("Your password:\t")
   pass_hash = hash(password)
   try:
     c.execute("SELECT name FROM users WHERE name=?", (username,))
     user = c.fetchall[1]
+    c.execute("SELECT uid FROM users WHERE name=?", (username,))
+    user_id = c.fetchall()[1]
     c.execute("SELECT password FROM users WHERE password=?", (pass_hash,))
-    
-    print("Welcome ", username)
+    admin_check = c.fetchall()[1]
+    current_user.append(user_id)
+    current_user.append(admin_check)
+    print("Welcome ", user)
+    keepgoing()
+    return current_user
+  except:
+    print("You have mistyped your Username or Password, try again.")
+    login()
 '''
 def cleanup(userInput, userChoice):
   if userChoice == 1:
@@ -99,7 +109,7 @@ def cleanup(userInput, userChoice):
       return print("\nThat is an invalid input, try again."), current_option(userChoice)
   
 
-#further cleanup before returning for database use
+  #further cleanup before returning for database use
   current_position = 0
   
   final_string = ''

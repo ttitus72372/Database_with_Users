@@ -2,7 +2,17 @@ import sqlite3
 
 conn = sqlite3.connect('country.db')
 c = conn.cursor()
+
 '''
+c.execute("DROP TABLE users")
+c.execute("""CREATE TABLE IF NOT EXISTS users(
+  uid integer PRIMARY KEY,
+  name text,
+  password text,
+  number integer,
+  UNIQUE(name)
+)""")
+
 c.execute("DROP VIEW user_inputs")
 c.execute("""CREATE VIEW  IF NOT EXISTS user_inputs AS
             SELECT country.id, country.name, country.uid
@@ -11,22 +21,13 @@ c.execute("""CREATE VIEW  IF NOT EXISTS user_inputs AS
 
 conn.commit()
 
-
-
-c.execute("""CREATE TABLE IF NOT EXISTS users(
-  uid integer PRIMARY KEY,
-  name text,
-  password text,
-  UNIQUE(name)
-)""")
-
-
 c.execute(""" CREATE TABLE IF NOT EXISTS country (
   id integer PRIMARY KEY,
   name text NOT NULL,
   uid INTEGER REFERENCES users(uid), 
   UNIQUE(name)
 )""")
+
 
 admin = "admin"
 password = "S3CR3T"

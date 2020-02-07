@@ -1,4 +1,6 @@
 import sqlite3
+import hashlib
+import os
 
 conn = sqlite3.connect('country.db')
 c = conn.cursor()
@@ -9,7 +11,7 @@ c.execute("""CREATE TABLE IF NOT EXISTS users(
   uid integer PRIMARY KEY,
   name text,
   password text,
-  number integer,
+  usn text,
   UNIQUE(name)
 )""")
 
@@ -31,10 +33,48 @@ c.execute(""" CREATE TABLE IF NOT EXISTS country (
 
 admin = "admin"
 password = "S3CR3T"
-admin_pass = hash(password)
+
+
+salt = os.urandom(32)
+pass_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+c.execute("INSERT INTO users(name, password, usn) VALUES(?,?,?)", (admin, pass_hash, salt,))
+conn.commit()
+
+
+password = input("Password test:")
+c.execute("SELECT usn FROM users WHERE uid = 1")
+salt = c.fetchone()[0]
+print("Salt.....")
+print(salt)
+
+hash_test = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+c.execute("SELECT password FROM users WHERE password=?", (hash_test,))
+stored_password = c.fetchone()[0]
+
+if hash_test == stored_password:
+  print("Success!")
+
+
+print("Name")
+c.execute("SELECT name FROM users")
+print(c.fetchall())
+
+print("\nSalt")
+c.execute("SELECT usn FROM users")
+print(c.fetchall())
+
+print("\nPassword")
+c.execute("SELECT password FROM users WHERE uid=1")
+passwrd = c.fetchone()[0]
+print(passwrd)
 '''
 
-
+def sign_in():
+  choice = int(input("Choose an option:\nEnter 1 if you have used this database before.\nEnter 2 if you're new.\nYour option:\t "))
+  if choice == 1:
+    login()
+  if choice == 2:
+    sign_up()
 
 def sign_up():
   new_user = input("\nCreate a username:\t")
@@ -50,29 +90,26 @@ def sign_up():
     if character == ' ':
       print("There is a space in your passowrd, try again.")
       sign_up()
-  new_pass_hash = hash(new_password)
+  salt = os.urandom(32)
+  new_pass_hash = hashlib.pbkdf2_hmac('sha256', new_password.encode('utf-8'), salt, 100000)
+  
+
+
+  c.execute("SELECT * FROM users WHERE name=?", (new_user,))
   try:
-    c.execute("SELECT * FROM users WHERE name=?", (new_user,))
     user = c.fetchone()[1]
     print(user, " is taken, try again.")
     sign_up()
   except:
-    c.execute("INSERT INTO user(name, password) VALUES(?)", (new_user, new_pass_hash,))
-    check_addition = new_user
-    c.execute("SELECT * FROM country WHERE name=?", (check_addition,))
+    c.execute("INSERT INTO users(name, password, usn) VALUES(?,?,?)", (new_user, new_pass_hash, salt,))
+    
+    c.execute("SELECT * FROM country WHERE name=?", (new_user,))
     check = c.fetchone()[1]
-    print("You are in the database, ", check)
+    print("You have been added to the database, ", check)
     conn.commit()
     print("\n\t...Redirecting to login....\t")
     print("------------------------------")
     login()
-
-def sign_in():
-  choice = int(input("\nChoose an option:\nEnter 1 if you have used this database before.\nEnter 2 if you're new.\nYour option:\t "))
-  if choice == 1:
-    login()
-  if choice == 2:
-    sign_up()
 
 def login():
   current_user = []
@@ -81,28 +118,29 @@ def login():
     if character == ' ':
       print("There is a space in your username, try again.")
       login()
+  c.execute("SELECT usn FROM users WHERE name=?", (username,))
+  salt = c.fetchone()[0]
+  print("Checking the salt:", salt)
   password = input("Your password:\t")
   for character in password:
     if character == ' ':
       print("There is a space in your passowrd, try again.")
       login()
-  pass_hash = hash(password)
-  try:
-    c.execute("SELECT name FROM users WHERE name=?", (username,))
-    user = c.fetchall[0]
+  pass_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+  c.execute("SELECT password FROM users WHERE name=?", (username,))
+  stored_password = c.fetchone()[0]
+  if pass_hash == stored_password:
     c.execute("SELECT uid FROM users WHERE name=?", (username,))
-    user_id = c.fetchall()[0]
-    c.execute("SELECT password FROM users WHERE password=?", (pass_hash,))
-    admin_check = c.fetchall()[0]
+    user_id = c.fetchone()[0]
     current_user.append(user_id)
-    current_user.append(admin_check)
-    print("Welcome ", user, "\n")
+    current_user.append(stored_password)
+    print("Welcome", username, "\n")
+    print("Loading main menu.......")
     keepgoing(current_user)
-    
-  except:
-    print("You have mistyped your Username or Password, try again.")
+  if pass_hash != stored_password:
+    print("Your password is incorrect.")
     login()
-
+ 
 def cleanup(userInput, userChoice):
   if userChoice == 1:
     current_option = option1
@@ -170,7 +208,7 @@ def keepgoing(user_check):
     if choice == 1:
       option1(choice, user_checks)
     elif choice == 2:
-      option2(choice, user_checks)
+      option2(choice)
     elif choice == 3:
       option3()
     elif choice == 4:
@@ -182,8 +220,7 @@ def keepgoing(user_check):
 def option1(choice, user_check):
   user_option = choice
   current_option = option1
-  user_checks = user_check
-  uid = user_checks[0]
+  uid = user_check[0]
   add_country = input("\nType in the name of a country you wish to add:\n")
   
   #cleaning up user input
@@ -192,7 +229,7 @@ def option1(choice, user_check):
   try:
     countries = c.fetchone()[1]
     print(countries, "is already in the database, try again.")
-    current_option(user_option)
+    current_option(user_option, user_check)
   except:
     c.execute("INSERT INTO country(name, uid) VALUES(?,?)", (newstring, uid,))
     check_addition = newstring
@@ -227,12 +264,14 @@ def option3():
   
 def option4(choice,user_check):
   user_option = choice
-  user_checks = user_check
-  c.execute("Select passowrd FROM users where uid = 1;")
+  
+  user_pass = user_check[1]
+  c.execute("Select password FROM users WHERE uid =1")
   admin = c.fetchone()[0]
-  if user_checks[1] != admin:
+  if user_pass != admin:
     print("You're not the admin, you can not delete records from the database!")
-    keepgoing(user_checks)
+    print("Redirecting to main menu.......\n")
+    keepgoing(user_check)
   remove_country = input("\nType in the name of a country you wish to delete:\n")
   #cleaning up user input
   newstring = cleanup(remove_country, user_option)

@@ -1,0 +1,46 @@
+Try/Except from the login() function:
+  try:
+    c.execute("SELECT name FROM users WHERE name=?", (username,))
+    user = c.fetchall[0]
+    c.execute("SELECT uid FROM users WHERE name=?", (username,))
+    user_id = c.fetchall()[0]
+    c.execute("SELECT password FROM users WHERE password=?", (pass_hash,))
+    admin_check = c.fetchall()[0]
+    current_user.append(user_id)
+    current_user.append(admin_check)
+    print("Welcome ", user, "\n")
+    keepgoing(current_user)
+    
+  except:
+    print("You have mistyped your Username or Password, try again.")
+    login()
+
+
+Try/Except from signUp() function:
+  c.execute("SELECT * FROM users WHERE name=?", (new_user,))
+  try:
+    user = c.fetchone()[1]
+    print(user, " is taken, try again.")
+    sign_up()
+  except:
+    c.execute("INSERT INTO users(name, password, usn) VALUES(?,?,?)", (new_user, new_pass_hash, salt,))
+    
+    c.execute("SELECT * FROM country WHERE name=?", (new_user,))
+    check = c.fetchone()[1]
+    print("You have been added to the database, ", check)
+    conn.commit()
+    print("\n\t...Redirecting to login....\t")
+    print("------------------------------")
+    login()
+
+
+    VS.
+
+
+Try/Except from option2() function:
+  c.execute("SELECT * FROM country WHERE name=?", (newstring,))
+  try:
+    countries = c.fetchone()[1]
+    print(countries, "was found.")
+  except:
+    print("That country is not in the database.")

@@ -27,7 +27,7 @@ c.execute("""CREATE TABLE IF NOT EXISTS users(
 
 c.execute("DROP VIEW user_inputs")
 c.execute("""CREATE VIEW  IF NOT EXISTS user_inputs AS
-            SELECT country.id, country.name, country.uid,
+            SELECT country.id, country.name AS country, country.uid,
             users.name AS user
             FROM country
             LEFT JOIN users ON users.uid = country.uid;""")
@@ -78,23 +78,23 @@ def sign_in():
   print("Welcome to the Simple Countries Database!")
   choice = int(input("\nChoose an option:\nEnter 1 if you have used this database before.\nEnter 2 if you're new.\nYour option:\t "))
   if choice == 1:
-    login()
+    login(choice)
   if choice == 2:
-    sign_up()
+    sign_up(choice)
 
-def sign_up():
-  option = 2
+def sign_up(choice):
+  option = choice
   print("\nWelcome new user, please create a username and password for yourself.")
   new_user = input("\nCreate a username:\t")
   cleaned_user = name_formating(new_user, option)
   new_password = input("\n Make a password between 3 and 20 characters and no spaces:\t")
   if len(new_password) < 3 or len(new_password) > 20:
     print("Your passowrd is less than 3 characters or longer than 20 characters, try again.")
-    sign_up()
+    sign_up(option)
   for character in new_password:
     if character == ' ':
       print("There is a space in your passowrd, try again.")
-      sign_up()
+      sign_up(option)
     else:
       try:
         salt = os.urandom(32)
@@ -108,8 +108,8 @@ def sign_up():
         print("That name is already taken.")
         sign_up()
   
-def login():
-  option = 1
+def login(choice):
+  option = choice
   current_user = []
   print("\n....Login....\n")
   username = input("Your Username:\t")
@@ -121,7 +121,7 @@ def login():
   for character in password:
     if character == ' ':
       print("There is a space in your passowrd, try again.")
-      login()
+      login(option)
   pass_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
   c.execute("SELECT password FROM users WHERE name=?", (cleaned_username,))
   stored_password = c.fetchone()[0]
@@ -137,18 +137,23 @@ def login():
     print("Your password is incorrect.")
     login()
 
-def name_formating(name, menu_option):
-  if menu_option == 1:
+def name_formating(name, choice):
+  if choice == 1:
     menu_option = login
-  if menu_option == 2:
+  if choice == 2:
     menu_option = sign_up
+  if choice == 7:
+    menu_option = option7
+  if choice == 8:
+    menu_option = option8
+    
   
   clean_name = name.capitalize()
   for x in clean_name:
     if x == " ":
-      return print("There was a space in your username."), menu_option()
+      return print("There was a space in the username."), menu_option(choice)
   if clean_name.isalnum() == False:
-    return print("You have a special character in your username, you typed", name), menu_option()
+    return print("There is a special character in the username. You typed", name), menu_option(choice)
   elif clean_name.isalnum() == True:
     return clean_name
 
@@ -214,8 +219,8 @@ def cleanup(userInput, userChoice):
 def keepgoing(user_check):
   choice = 0
   user_checks = user_check
-  while choice != 5:
-    choice = int(input("\nChoose an option." + "\n" + "1 to add a country" + "\n" + "2 to search for a specific country" + "\n" + "3 show all countries in the database" + "\n" + "4 to delete a country" + "\n" "5 to exit and logout.\n" + "\nYour option:\t"))
+  while choice != 7:
+    choice = int(input("\nChoose an option." + "\n" + "1. To add a country" + "\n" + "2. To search for a specific country" + "\n" + "3. To show all countries in the database" + "\n" + "4. To delete a country" + "\n" "5. To show all users" +"\n 6. To show which country was added by which user."+"\n 7. To search for a specific user."+"\n 8. To delete a user."+"\n 9. To logout and switch users."+"10. To logout and close the database connection."+"\nYour option:\t"))
     if choice == 1:
       option1(choice, user_checks)
     elif choice == 2:
@@ -226,6 +231,9 @@ def keepgoing(user_check):
       option4(choice, user_checks)
     elif choice == 5:
       option5()
+    elif choice == 6:
+      option6()
+    
   
 def option1(choice, user_check):
   user_option = choice
@@ -256,7 +264,7 @@ def option2(choice):
   c.execute("SELECT * FROM country WHERE name=?", (newstring,))
   try:
     countries = c.fetchone()[1]
-    print(countries, "was found.")
+    print(countries, "is in the database.")
   except:
     print("That country is not in the database.")
 
@@ -296,13 +304,71 @@ def option4(choice,user_check):
   
 def option5():
   c.execute("SELECT name FROM users")
-  print("\nAll users of the database:")
+  print("\nAll users in the database:")
   print("-------------------")
   for row in c.fetchall():
     for item in row:
       item = row[0]
       print(item)
   print('\n')
+
+def option6():
+  c.execute("SELECT country, user FROM user_inputs")
+  print("\nCounty\t||\tAdded by")
+  print("-------------------")
+  for row in c.fetchall():
+    for item in row:
+      country = row[0]
+      user = row[1]
+    print(country,"\t||\t",user)
+
+def option7(choice):
+  user_option = choice
+  search_user = input("\nType in the username you wish to search for:\n")
+  #cleaning up user input
+  cleaned_name = name_formating(search_user, user_option)
+  c.execute("SELECT * FROM users WHERE name=?", (cleaned_name,))
+  try:
+    user = c.fetchone()[1]
+    print(user, "is in the database.")
+  except:
+    print("That user is not in the database.")
+
+def option8(choice, user_check):
+  user_option = choice
+  user_pass = user_check[1]
+  c.execute("Select password FROM users WHERE uid =1")
+  admin = c.fetchone()[0]
+  if user_pass != admin:
+    print("You're not the admin, you can not delete records from the database!")
+    print("Redirecting to main menu.......\n")
+    keepgoing(user_check)
+  remove_user = input("\nType in the name of a user you wish to delete:\n")
+  #cleaning up user input
+  user_clean = name_formating(remove_user, user_option)
+  #double checking to make sure the user submitted is in the database
+  
+  if user_pass == admin:
+    print("The Admin can not be deleted!")
+    print("Booting to main menu.....")
+    keepgoing(user_check)
+  c.execute("SELECT * FROM users WHERE name=?", (user_clean,))
+  try:
+    user = c.fetchone()[1]
+    if user is not None:
+      c.execute("DELETE FROM users WHERE name=?", (user_clean,))
+      conn.commit()
+      print(user_clean, "was deleted.\n")
+  except:
+    print("That user is not in the database.")
+
+def option9(user_check):
+  uid = user_check[0]
+  c.execute("SELECT name FROM users WHERE uid=?",(uid,))
+  user = c.fetchone()[0]
+  print("Logging out....")
+  print("Goodbye,", user)
+  sign_in()
 
 def option10():
   conn.commit()

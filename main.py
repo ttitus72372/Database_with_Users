@@ -220,7 +220,7 @@ def keepgoing(user_check):
   choice = 0
   user_checks = user_check
   while choice != 10:
-    choice = int(input("\nChoose an option." + "\n 1. To add a country" + "\n 2. To search for a specific country" + "\n 3. To show all countries in the database" + "\n 4. To delete a country" + "\n 5. To show all users" +"\n 6. To show which country was added by which user."+"\n 7. To search for a specific user."+"\n 8. To delete a user."+"\n 9. To logout and switch users."+"10. To logout and close the database connection."+"\nYour option:\t"))
+    choice = int(input("\nChoose an option." + "\n 1. To add a country" + "\n 2. To search for a specific country" + "\n 3. To show all countries in the database" + "\n 4. To delete a country" + "\n 5. To show all users" +"\n 6. To show which country was added by which user."+"\n 7. To search for a specific user."+"\n 8. To delete a user."+"\n 9. To logout and switch users."+"\n 10. To logout and close the database connection."+"\nYour option:\t"))
     if choice == 1:
       option1(choice, user_checks)
     elif choice == 2:

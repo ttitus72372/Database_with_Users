@@ -219,8 +219,8 @@ def cleanup(userInput, userChoice):
 def keepgoing(user_check):
   choice = 0
   user_checks = user_check
-  while choice != 7:
-    choice = int(input("\nChoose an option." + "\n" + "1. To add a country" + "\n" + "2. To search for a specific country" + "\n" + "3. To show all countries in the database" + "\n" + "4. To delete a country" + "\n" "5. To show all users" +"\n 6. To show which country was added by which user."+"\n 7. To search for a specific user."+"\n 8. To delete a user."+"\n 9. To logout and switch users."+"10. To logout and close the database connection."+"\nYour option:\t"))
+  while choice != 10:
+    choice = int(input("\nChoose an option." + "\n 1. To add a country" + "\n 2. To search for a specific country" + "\n 3. To show all countries in the database" + "\n 4. To delete a country" + "\n 5. To show all users" +"\n 6. To show which country was added by which user."+"\n 7. To search for a specific user."+"\n 8. To delete a user."+"\n 9. To logout and switch users."+"10. To logout and close the database connection."+"\nYour option:\t"))
     if choice == 1:
       option1(choice, user_checks)
     elif choice == 2:
@@ -233,7 +233,14 @@ def keepgoing(user_check):
       option5()
     elif choice == 6:
       option6()
-    
+    elif choice == 7:
+      option7(choice)
+    elif choice == 8:
+      option8(choice, user_checks)
+    elif choice == 9:
+      option9(user_checks)
+    elif choice == 10:
+      option10()
   
 def option1(choice, user_check):
   user_option = choice

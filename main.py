@@ -6,6 +6,16 @@ conn = sqlite3.connect('country.db')
 c = conn.cursor()
 
 '''
+
+
+c.execute(""" CREATE TABLE IF NOT EXISTS country (
+  id integer PRIMARY KEY,
+  name text NOT NULL,
+  uid INTEGER REFERENCES users(uid), 
+  UNIQUE(name)
+)""")
+
+
 c.execute("DROP TABLE users")
 c.execute("""CREATE TABLE IF NOT EXISTS users(
   uid integer PRIMARY KEY,
@@ -17,21 +27,14 @@ c.execute("""CREATE TABLE IF NOT EXISTS users(
 
 c.execute("DROP VIEW user_inputs")
 c.execute("""CREATE VIEW  IF NOT EXISTS user_inputs AS
-            SELECT country.id, country.name, country.uid
+            SELECT country.id, country.name, country.uid,
+            users.name AS user
             FROM country
             LEFT JOIN users ON users.uid = country.uid;""")
 
 conn.commit()
 
-c.execute(""" CREATE TABLE IF NOT EXISTS country (
-  id integer PRIMARY KEY,
-  name text NOT NULL,
-  uid INTEGER REFERENCES users(uid), 
-  UNIQUE(name)
-)""")
-
-
-admin = "admin"
+admin = "Admin"
 password = "S3CR3T"
 
 
@@ -39,6 +42,10 @@ salt = os.urandom(32)
 pass_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
 c.execute("INSERT INTO users(name, password, usn) VALUES(?,?,?)", (admin, pass_hash, salt,))
 conn.commit()
+
+print("Name")
+c.execute("SELECT name FROM users")
+print(c.fetchall())
 
 
 password = input("Password test:")
@@ -55,9 +62,7 @@ if hash_test == stored_password:
   print("Success!")
 
 
-print("Name")
-c.execute("SELECT name FROM users")
-print(c.fetchall())
+
 
 print("\nSalt")
 c.execute("SELECT usn FROM users")
@@ -70,18 +75,18 @@ print(passwrd)
 '''
 
 def sign_in():
-  choice = int(input("Choose an option:\nEnter 1 if you have used this database before.\nEnter 2 if you're new.\nYour option:\t "))
+  print("Welcome to the Simple Countries Database!")
+  choice = int(input("\nChoose an option:\nEnter 1 if you have used this database before.\nEnter 2 if you're new.\nYour option:\t "))
   if choice == 1:
     login()
   if choice == 2:
     sign_up()
 
 def sign_up():
+  option = 2
+  print("\nWelcome new user, please create a username and password for yourself.")
   new_user = input("\nCreate a username:\t")
-  for character in new_user:
-    if character == ' ':
-      print("There is a space in your passowrd, try again.")
-      sign_up()
+  cleaned_user = name_formating(new_user, option)
   new_password = input("\n Make a password between 3 and 20 characters and no spaces:\t")
   if len(new_password) < 3 or len(new_password) > 20:
     print("Your passowrd is less than 3 characters or longer than 20 characters, try again.")
@@ -90,57 +95,63 @@ def sign_up():
     if character == ' ':
       print("There is a space in your passowrd, try again.")
       sign_up()
-  salt = os.urandom(32)
-  new_pass_hash = hashlib.pbkdf2_hmac('sha256', new_password.encode('utf-8'), salt, 100000)
+    else:
+      try:
+        salt = os.urandom(32)
+        new_pass_hash = hashlib.pbkdf2_hmac('sha256', new_password.encode('utf-8'), salt, 100000)
+        c.execute("INSERT INTO users(name, password, usn) VALUES(?,?,?)", (cleaned_user, new_pass_hash, salt,))
+        conn.commit()
+        print("\n\t...Redirecting to login....\t")
+        print("------------------------------")
+        login()
+      except:
+        print("That name is already taken.")
+        sign_up()
   
-
-
-  c.execute("SELECT * FROM users WHERE name=?", (new_user,))
-  try:
-    user = c.fetchone()[1]
-    print(user, " is taken, try again.")
-    sign_up()
-  except:
-    c.execute("INSERT INTO users(name, password, usn) VALUES(?,?,?)", (new_user, new_pass_hash, salt,))
-    
-    c.execute("SELECT * FROM country WHERE name=?", (new_user,))
-    check = c.fetchone()[1]
-    print("You have been added to the database, ", check)
-    conn.commit()
-    print("\n\t...Redirecting to login....\t")
-    print("------------------------------")
-    login()
-
 def login():
+  option = 1
   current_user = []
+  print("\n....Login....\n")
   username = input("Your Username:\t")
-  for character in username:
-    if character == ' ':
-      print("There is a space in your username, try again.")
-      login()
-  c.execute("SELECT usn FROM users WHERE name=?", (username,))
+  cleaned_username = name_formating(username, option)
+  c.execute("SELECT usn FROM users WHERE name=?", (cleaned_username,))
   salt = c.fetchone()[0]
-  print("Checking the salt:", salt)
+  #print("Checking the salt:", salt)
   password = input("Your password:\t")
   for character in password:
     if character == ' ':
       print("There is a space in your passowrd, try again.")
       login()
   pass_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
-  c.execute("SELECT password FROM users WHERE name=?", (username,))
+  c.execute("SELECT password FROM users WHERE name=?", (cleaned_username,))
   stored_password = c.fetchone()[0]
   if pass_hash == stored_password:
-    c.execute("SELECT uid FROM users WHERE name=?", (username,))
+    c.execute("SELECT uid FROM users WHERE name=?", (cleaned_username,))
     user_id = c.fetchone()[0]
     current_user.append(user_id)
     current_user.append(stored_password)
-    print("Welcome", username, "\n")
+    print("Welcome", cleaned_username, "\n")
     print("Loading main menu.......")
     keepgoing(current_user)
   if pass_hash != stored_password:
     print("Your password is incorrect.")
     login()
- 
+
+def name_formating(name, menu_option):
+  if menu_option == 1:
+    menu_option = login
+  if menu_option == 2:
+    menu_option = sign_up
+  
+  clean_name = name.capitalize()
+  for x in clean_name:
+    if x == " ":
+      return print("There was a space in your username."), menu_option()
+  if clean_name.isalnum() == False:
+    return print("You have a special character in your username, you typed", name), menu_option()
+  elif clean_name.isalnum() == True:
+    return clean_name
+
 def cleanup(userInput, userChoice):
   if userChoice == 1:
     current_option = option1
@@ -216,7 +227,6 @@ def keepgoing(user_check):
     elif choice == 5:
       option5()
   
-
 def option1(choice, user_check):
   user_option = choice
   current_option = option1
@@ -238,8 +248,6 @@ def option1(choice, user_check):
     print(check, "was added to the database.\n")
     conn.commit()
   
-  
-
 def option2(choice):
   user_option = choice
   search_country = input("\nType in the country you wish to search for:\n")
@@ -251,6 +259,7 @@ def option2(choice):
     print(countries, "was found.")
   except:
     print("That country is not in the database.")
+
 def option3():
   c.execute("SELECT name FROM country")
   print("\nThe countries currently in the database are:")
@@ -261,7 +270,6 @@ def option3():
       print(item)
   print('\n')
       
-  
 def option4(choice,user_check):
   user_option = choice
   
@@ -287,8 +295,21 @@ def option4(choice,user_check):
     print("That country is not in the database.")
   
 def option5():
+  c.execute("SELECT name FROM users")
+  print("\nAll users of the database:")
+  print("-------------------")
+  for row in c.fetchall():
+    for item in row:
+      item = row[0]
+      print(item)
+  print('\n')
+
+def option10():
   conn.commit()
   conn.close()
   quit("Done")
+
+
+
 sign_in()
 

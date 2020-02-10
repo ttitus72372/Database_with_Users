@@ -24,7 +24,6 @@ Try/Except from signUp() function:
     sign_up()
   except:
     c.execute("INSERT INTO users(name, password, usn) VALUES(?,?,?)", (new_user, new_pass_hash, salt,))
-    
     c.execute("SELECT * FROM country WHERE name=?", (new_user,))
     check = c.fetchone()[1]
     print("You have been added to the database, ", check)

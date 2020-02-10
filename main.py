@@ -103,10 +103,10 @@ def sign_up(choice):
         conn.commit()
         print("\n\t...Redirecting to login....\t")
         print("------------------------------")
-        login()
+        login(option)
       except:
         print("That name is already taken.")
-        sign_up()
+        sign_up(option)
   
 def login(choice):
   option = choice

@@ -359,7 +359,10 @@ def option8(choice, user_check):
   user_clean = name_formating(remove_user, user_option)
   #double checking to make sure the user submitted is in the database
   
-  if user_pass == admin:
+  c.execute("SELECT uid FROM users WHERE name=?", (user_clean,))
+  uid = c.fetchone()[0]
+
+  if uid == user_check[0]:
     print("The Admin can not be deleted!")
     print("Booting to main menu.....")
     keepgoing(user_check)

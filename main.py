@@ -96,7 +96,12 @@ def sign_up(choice):
       print("There is a space in your passowrd, try again.")
       sign_up(option)
     else:
+      c.execute("SELECT * FROM users WHERE name=?", (cleaned_user,))
       try:
+        user = c.fetchone[1]
+        print(user, "as a username is already taken.")
+        sign_up(option)
+      except:
         salt = os.urandom(32)
         new_pass_hash = hashlib.pbkdf2_hmac('sha256', new_password.encode('utf-8'), salt, 100000)
         c.execute("INSERT INTO users(name, password, usn) VALUES(?,?,?)", (cleaned_user, new_pass_hash, salt,))
@@ -104,9 +109,7 @@ def sign_up(choice):
         print("\n\t...Redirecting to login....\t")
         print("------------------------------")
         login(option)
-      except:
-        print("That name is already taken.")
-        sign_up(option)
+
   
 def login(choice):
   option = choice
@@ -329,6 +332,7 @@ def option6():
       user = row[1]
     print(country,"\t\t\t",user)
     print("------------------------")
+
 def option7(choice):
   user_option = choice
   search_user = input("\nType in the username you wish to search for:\n")

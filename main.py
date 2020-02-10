@@ -321,14 +321,14 @@ def option5():
 
 def option6():
   c.execute("SELECT country, user FROM user_inputs")
-  print("\nCounty\t||\tAdded by")
-  print("-------------------")
+  print("\nCounty\t\t\tAdded by")
+  print("------------------------")
   for row in c.fetchall():
     for item in row:
       country = row[0]
       user = row[1]
-    print(country,"\t||\t",user)
-
+    print(country,"\t\t\t",user)
+    print("------------------------")
 def option7(choice):
   user_option = choice
   search_user = input("\nType in the username you wish to search for:\n")
@@ -375,6 +375,7 @@ def option9(user_check):
   user = c.fetchone()[0]
   print("Logging out....")
   print("Goodbye,", user)
+  print()
   sign_in()
 
 def option10():

@@ -135,7 +135,7 @@ def login(choice):
     keepgoing(current_user)
   if pass_hash != stored_password:
     print("Your password is incorrect.")
-    login()
+    login(option)
 
 def name_formating(name, choice):
   if choice == 1:

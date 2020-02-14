@@ -5,9 +5,9 @@ import os
 conn = sqlite3.connect('country.db')
 c = conn.cursor()
 
+
+
 '''
-
-
 c.execute(""" CREATE TABLE IF NOT EXISTS country (
   id integer PRIMARY KEY,
   name text NOT NULL,

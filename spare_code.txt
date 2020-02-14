@@ -43,3 +43,14 @@ Try/Except from option2() function:
     print(countries, "was found.")
   except:
     print("That country is not in the database.")
+
+
+----------SQLite with Flask links----------
+
+https://www.tutorialspoint.com/flask/flask_sqlite.htm
+
+https://www.javatpoint.com/flask-sqlite
+
+https://opentechschool.github.io/python-flask/extras/databases.html
+
+https://repl.it/@mat1/Flask-example

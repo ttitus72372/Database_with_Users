@@ -1,3 +1,6 @@
+admin = "Admin"
+password = "S3CR3T"
+
 Try/Except from the login() function:
   try:
     c.execute("SELECT name FROM users WHERE name=?", (username,))

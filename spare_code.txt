@@ -125,6 +125,3 @@ https://repl.it/@mat1/Flask-example
   passwrd = c.fetchone()[0]
   print(passwrd)
   '''
-
-
-kjhefkerhfkjhkldsjefhkasjhfvkjdsfh

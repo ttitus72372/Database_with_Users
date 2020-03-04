@@ -1,6 +1,7 @@
 import sqlite3
 import hashlib
 import os
+import cleanup
 
 conn = sqlite3.connect('country.db')
 c = conn.cursor()
@@ -13,25 +14,24 @@ def sign_in():
   if choice == 2:
     sign_up(choice)
 
-def sign_up(choice):
-  option = choice
+def sign_up():
   print("\nWelcome new user, please create a username and password for yourself.")
   new_user = input("\nCreate a username:\t")
-  cleaned_user = name_formating(new_user, option)
+  cleaned_user = cleanup.username(new_user)
   new_password = input("\n Make a password between 3 and 20 characters and no spaces:\t")
   if len(new_password) < 3 or len(new_password) > 20:
     print("Your passowrd is less than 3 characters or longer than 20 characters, try again.")
-    sign_up(option)
+    sign_up()
   for character in new_password:
     if character == ' ':
       print("There is a space in your passowrd, try again.")
-      sign_up(option)
+      sign_up()
     else:
       c.execute("SELECT * FROM users WHERE name=?", (cleaned_user,))
       try:
         user = c.fetchone[1]
         print(user, "as a username is already taken.")
-        sign_up(option)
+        sign_up()
       except:
         salt = os.urandom(32)
         new_pass_hash = hashlib.pbkdf2_hmac('sha256', new_password.encode('utf-8'), salt, 100000)
@@ -39,15 +39,14 @@ def sign_up(choice):
         conn.commit()
         print("\n\t...Redirecting to login....\t")
         print("------------------------------")
-        login(option)
+        login()
 
   
-def login(choice):
-  option = choice
+def login():
   current_user = []
   print("\n....Login....\n")
   username = input("Your Username:\t")
-  cleaned_username = name_formating(username, option)
+  cleaned_username = cleanup.username(username)
   c.execute("SELECT usn FROM users WHERE name=?", (cleaned_username,))
   salt = c.fetchone()[0]
   #print("Checking the salt:", salt)
@@ -55,7 +54,7 @@ def login(choice):
   for character in password:
     if character == ' ':
       print("There is a space in your passowrd, try again.")
-      login(option)
+      login()
   pass_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
   c.execute("SELECT password FROM users WHERE name=?", (cleaned_username,))
   stored_password = c.fetchone()[0]
@@ -69,7 +68,7 @@ def login(choice):
     keepgoing(current_user)
   if pass_hash != stored_password:
     print("Your password is incorrect.")
-    login(option)
+    login()
 
 def name_formating(name, choice):
   if choice == 1:

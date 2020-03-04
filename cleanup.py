@@ -1,20 +1,13 @@
-def name_formating(name, choice):
-  if choice == 1:
-    menu_option = login
-  if choice == 2:
-    menu_option = sign_up
-  if choice == 7:
-    menu_option = option7
-  if choice == 8:
-    menu_option = option8
-    
-  
+def username(name):
+  error = ""
   clean_name = name.capitalize()
   for x in clean_name:
     if x == " ":
-      return print("There was a space in the username."), menu_option(choice)
+      error = "There is a space in the username."
+      return error
   if clean_name.isalnum() == False:
-    return print("There is a special character in the username. You typed", name), menu_option(choice)
+    error = "There is a special character in your username."
+    return error
   elif clean_name.isalnum() == True:
     return clean_name
 
